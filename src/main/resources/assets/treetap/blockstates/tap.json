@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "treetap:block/tap",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "treetap:block/tap"
+    },
+    "facing=south": {
+      "model": "treetap:block/tap",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "treetap:block/tap",
+      "y": 270
+    }
+  }
+}

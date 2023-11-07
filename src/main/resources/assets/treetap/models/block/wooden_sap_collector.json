@@ -1,0 +1,8 @@
+{
+  "parent": "treetap:block/sap_collector",
+  "textures": {
+    "side": "treetap:block/wooden_bucket_side",
+    "bottom": "treetap:block/wooden_bucket_bottom",
+    "top": "treetap:block/wooden_bucket_top"
+  }
+}

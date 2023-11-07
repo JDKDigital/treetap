@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "treetap:block/wooden_sap_collector",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "treetap:block/wooden_sap_collector"
+    },
+    "facing=south": {
+      "model": "treetap:block/wooden_sap_collector",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "treetap:block/wooden_sap_collector",
+      "y": 270
+    }
+  }
+}
