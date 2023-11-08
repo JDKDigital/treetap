@@ -4,6 +4,7 @@ import cy.jdkdigital.treetap.TreeTap;
 import cy.jdkdigital.treetap.common.block.recipe.TapExtractRecipe;
 import cy.jdkdigital.treetap.compat.CompatHandler;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.forge.ForgeTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -18,6 +19,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -29,8 +32,8 @@ public class TapExtractRecipeCategory implements IRecipeCategory<TapExtractRecip
 
     public TapExtractRecipeCategory(IGuiHelper guiHelper) {
         ResourceLocation location = new ResourceLocation(TreeTap.MODID, "textures/gui/jei/tap_extract.png");
-        this.background = guiHelper.createDrawable(location, 0, 0, 90, 52);
-        this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(Items.COBBLESTONE));
+        this.background = guiHelper.createDrawable(location, 0, 0, 126, 70);
+        this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(TreeTap.TAP_ITEM.get()));
     }
 
     @Override
@@ -58,14 +61,17 @@ public class TapExtractRecipeCategory implements IRecipeCategory<TapExtractRecip
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, TapExtractRecipe recipe, IFocusGroup focuses) {
-        if (!recipe.input.isEmpty()) {
-            builder.addSlot(RecipeIngredientRole.INPUT, 5, 26)
-                    .addIngredients(VanillaTypes.ITEM_STACK, List.of(recipe.input.getItems()))
-                    .setSlotName("log");
-        }
-        builder.addSlot(RecipeIngredientRole.OUTPUT, 32, 26)
+        builder.addSlot(RecipeIngredientRole.INPUT, 18, 27)
+                .addIngredients(VanillaTypes.ITEM_STACK, List.of(recipe.input.getItems()))
+                .setSlotName("log");
+        builder.addSlot(RecipeIngredientRole.OUTPUT, 90, 27)
                 .addIngredients(VanillaTypes.ITEM_STACK, List.of(recipe.itemOutput.copy(), recipe.woodenItemOutput.copy()))
                 .setSlotName("output");
+
+        recipe.itemOutput.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).ifPresent(h -> {
+            builder.addInvisibleIngredients(RecipeIngredientRole.OUTPUT)
+                    .addIngredient(ForgeTypes.FLUID_STACK, new FluidStack(h.getFluidInTank(0), h.getTankCapacity(0)));
+        });
     }
 
     @Override

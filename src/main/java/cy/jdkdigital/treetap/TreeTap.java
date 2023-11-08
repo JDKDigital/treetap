@@ -69,6 +69,7 @@ public class TreeTap
     public static final RegistryObject<ColoredParticleType> COLORED_DRIP_PARTICLE = PARTICLE_TYPES.register("colored_drip_particle", ColoredParticleType::new);
 
     public static final TagKey<Block> TAPPABLE = TagKey.create(Registries.BLOCK, new ResourceLocation(MODID, "tappable"));
+    public static final TagKey<Item> TAPS = TagKey.create(Registries.ITEM, new ResourceLocation(MODID, "taps"));
     public static final TagKey<Item> METAL_BUCKETS = TagKey.create(Registries.ITEM, new ResourceLocation(MODID, "metal_buckets"));
     public static final TagKey<Item> WOODEN_BUCKETS = TagKey.create(Registries.ITEM, new ResourceLocation(MODID, "wooden_buckets"));
 

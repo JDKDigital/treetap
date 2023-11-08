@@ -4,6 +4,7 @@ import cy.jdkdigital.treetap.TreeTap;
 import cy.jdkdigital.treetap.common.block.recipe.TapExtractRecipe;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.recipe.RecipeType;
@@ -13,9 +14,11 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeManager;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.List;
 
 @JeiPlugin
@@ -35,7 +38,10 @@ public class TreeTapJeiPlugin implements IModPlugin
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalyst(new ItemStack(TreeTap.TAP.get()), TAP_EXTRACT_TYPE);
+//        registration.addRecipeCatalyst(new ItemStack(TreeTap.TAP.get()), TAP_EXTRACT_TYPE);
+        Arrays.stream(Ingredient.of(TreeTap.TAPS).getItems()).forEach(itemStack -> {
+            registration.addRecipeCatalyst(itemStack, TAP_EXTRACT_TYPE);
+        });
     }
 
     @Override

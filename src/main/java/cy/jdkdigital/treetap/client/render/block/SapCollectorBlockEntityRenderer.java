@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import cy.jdkdigital.treetap.common.block.entity.SapCollectorBlockEntity;
 import cy.jdkdigital.treetap.util.ColorUtil;
+import net.dries007.tfc.client.RenderHelpers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -29,6 +30,8 @@ public class SapCollectorBlockEntityRenderer implements BlockEntityRenderer<SapC
 
     public void render(SapCollectorBlockEntity blockEntity, float partialTicks, @Nonnull PoseStack poseStack, @Nonnull MultiBufferSource bufferSource, int combinedLightIn, int combinedOverlayIn) {
         if (blockEntity.progress > 0 && blockEntity.currentRecipe != null) {
+            poseStack.pushPose();
+
             Minecraft minecraft = Minecraft.getInstance();
             float pixHeight = 0.0625f;
 
@@ -39,8 +42,6 @@ public class SapCollectorBlockEntityRenderer implements BlockEntityRenderer<SapC
 
             //fluid brightness info
             int fluidBrightness = Math.max(combinedLightIn, fluid.getFluidType().getLightLevel());
-            int l2 = fluidBrightness >> 0x10 & 0xFFFF;
-            int i3 = fluidBrightness & 0xFFFF;
 
             //fluid colour tint info
             IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid);
@@ -52,11 +53,10 @@ public class SapCollectorBlockEntityRenderer implements BlockEntityRenderer<SapC
 
             //fluid texture info
             TextureAtlasSprite stillFluidSprite = minecraft.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(renderProperties.getStillTexture(fluidStack));
-            VertexConsumer vertexBuffer = bufferSource.getBuffer(RenderType.translucentNoCrumbling());
+            VertexConsumer vertexBuffer = bufferSource.getBuffer(RenderType.entityTranslucentCull(RenderHelpers.BLOCKS_ATLAS));
 
             //fluid render info
             Matrix4f lastPose = poseStack.last().pose();
-            Matrix3f matrix = poseStack.last().normal();
 
             float progress = (float)blockEntity.progress / (float)blockEntity.currentRecipe.processingTime;
             float fluidY = (4.0f + (9f * progress)) / 16f;
@@ -87,24 +87,20 @@ public class SapCollectorBlockEntityRenderer implements BlockEntityRenderer<SapC
                 default -> 0f;
             };
 
-            RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
-            RenderSystem.setShaderColor(color[0], color[1], color[2], color[3]);
-
             float fluidSpriteU0 = stillFluidSprite.getU0() + (stillFluidSprite.getU1() - stillFluidSprite.getU0()) / 8;
             float fluidSpriteU1 = stillFluidSprite.getU1() - (stillFluidSprite.getU1() - stillFluidSprite.getU0()) / 8;
             float fluidSpriteV0 = stillFluidSprite.getV0() + (stillFluidSprite.getV1() - stillFluidSprite.getV0()) / 8;
             float fluidSpriteV1 = stillFluidSprite.getV1() - (stillFluidSprite.getV1() - stillFluidSprite.getV0()) / 8;
             //north-west
-            vertexBuffer.vertex(lastPose, x1, fluidY, z1).color(color[0], color[1], color[2], color[3]).uv(fluidSpriteU0, fluidSpriteV1).uv2(l2, i3).normal(matrix, 0, 1, 0).endVertex();
+            vertexBuffer.vertex(lastPose, x1, fluidY, z1).color(color[0], color[1], color[2], color[3]).uv(fluidSpriteU0, fluidSpriteV1).overlayCoords(combinedOverlayIn).uv2(fluidBrightness).normal(0, 0, 1).endVertex();
             //south-west
-            vertexBuffer.vertex(lastPose, x1, fluidY, z2).color(color[0], color[1], color[2], color[3]).uv(fluidSpriteU0, fluidSpriteV0).uv2(l2, i3).normal(matrix, 0, 1, 0).endVertex();
+            vertexBuffer.vertex(lastPose, x1, fluidY, z2).color(color[0], color[1], color[2], color[3]).uv(fluidSpriteU0, fluidSpriteV0).overlayCoords(combinedOverlayIn).uv2(fluidBrightness).normal(0, 0, 1).endVertex();
             //south-east
-            vertexBuffer.vertex(lastPose, x2, fluidY, z2).color(color[0], color[1], color[2], color[3]).uv(fluidSpriteU1, fluidSpriteV0).uv2(l2, i3).normal(matrix, 0, 1, 0).endVertex();
+            vertexBuffer.vertex(lastPose, x2, fluidY, z2).color(color[0], color[1], color[2], color[3]).uv(fluidSpriteU1, fluidSpriteV0).overlayCoords(combinedOverlayIn).uv2(fluidBrightness).normal(0, 0, 1).endVertex();
             //north-east
-            vertexBuffer.vertex(lastPose, x2, fluidY, z1).color(color[0], color[1], color[2], color[3]).uv(fluidSpriteU1, fluidSpriteV1).uv2(l2, i3).normal(matrix, 0, 1, 0).endVertex();
+            vertexBuffer.vertex(lastPose, x2, fluidY, z1).color(color[0], color[1], color[2], color[3]).uv(fluidSpriteU1, fluidSpriteV1).overlayCoords(combinedOverlayIn).uv2(fluidBrightness).normal(0, 0, 1).endVertex();
 
-            RenderSystem.setShaderColor(1, 1, 1, 1);
-            RenderSystem.disableBlend();
+            poseStack.popPose();
         }
     }
 }

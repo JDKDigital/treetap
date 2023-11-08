@@ -69,14 +69,18 @@ public class SapCollectorBlockEntity extends BlockEntity
     }
 
     public void addProgress(int progress) {
-        this.progress += progress;
-
         if (currentRecipe != null) {
+            this.progress += progress;
+
             var fluidCap = currentRecipe.getResultItem(getBlockState()).getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
             if (fluidCap.isPresent()) {
                 fluidCap.ifPresent(fluidHandlerItem -> {
                     fluidHandler.ifPresent(h -> {
-                        h.fill(new FluidStack(fluidHandlerItem.getFluidInTank(0), 1), IFluidHandler.FluidAction.EXECUTE);
+                        if (h.getFluidInTank(0).isEmpty()) {
+                            h.fill(new FluidStack(fluidHandlerItem.getFluidInTank(0), (int)(1000f * ((float)this.progress / (float)currentRecipe.processingTime))), IFluidHandler.FluidAction.EXECUTE);
+                        } else {
+                            h.getFluidInTank(0).setAmount((int)(1000f * ((float)this.progress / (float)currentRecipe.processingTime)));
+                        }
                     });
                 });
             } else if (this.progress >= currentRecipe.processingTime) {

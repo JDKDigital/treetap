@@ -3,7 +3,7 @@
   "log": {
     "item": "tfc:wood/log/spruce"
   },
-  "processing_time": 12000,
+  "processing_time": 1200,
   "metal_result": {
     "item": "minecraft:water_bucket"
   },
