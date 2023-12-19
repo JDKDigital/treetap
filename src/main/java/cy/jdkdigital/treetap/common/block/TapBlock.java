@@ -52,8 +52,11 @@ public class TapBlock extends BaseEntityBlock
         this.registerDefaultState(this.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH).setValue(BlockStateProperties.ATTACHED, false));
     }
 
-    public float getModifier() {
-        return modifier;
+    public float getModifier(@Nullable Level level, @Nullable BlockPos pos) {
+        if (pos == null || level == null) {
+            return modifier;
+        }
+        return CompatHandler.adjustTapModifier(level, pos.relative(level.getBlockState(pos).getValue(HorizontalDirectionalBlock.FACING).getOpposite()), modifier);
     }
 
     @Nullable
@@ -107,7 +110,11 @@ public class TapBlock extends BaseEntityBlock
     @SuppressWarnings("deprecation")
     @Override
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        return level.getBlockState(pos.relative(state.getValue(HorizontalDirectionalBlock.FACING).getOpposite())).is(TreeTap.TAPPABLE);
+        var attachedPos = pos.relative(state.getValue(HorizontalDirectionalBlock.FACING).getOpposite());
+        if (level.getBlockState(attachedPos).is(TreeTap.TAPPABLE)) {
+            return CompatHandler.isValidTree(level, attachedPos);
+        }
+        return false;
     }
 
     @SuppressWarnings("deprecation")
@@ -121,6 +128,7 @@ public class TapBlock extends BaseEntityBlock
                 if (!player.isCreative()) {
                     player.getItemInHand(hand).shrink(1);
                 }
+                player.swing(hand);
                 return InteractionResult.CONSUME;
             }
         }

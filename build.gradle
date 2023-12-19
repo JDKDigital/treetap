@@ -139,7 +139,7 @@ dependencies {
     implementation fg.deobf("curse.maven:pams-harvestcraft-2-trees-365460:4625518")
 
     implementation fg.deobf("curse.maven:ender-io-64578:4800730")
-    implementation fg.deobf("curse.maven:terrafirmacraft-302973:4843577")
+    implementation fg.deobf("curse.maven:terrafirmacraft-302973:4895012")
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

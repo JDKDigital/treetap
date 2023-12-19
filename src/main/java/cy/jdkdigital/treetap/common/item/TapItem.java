@@ -1,8 +1,6 @@
 package cy.jdkdigital.treetap.common.item;
 
-import cy.jdkdigital.treetap.common.block.TapBlock;
 import cy.jdkdigital.treetap.compat.CompatHandler;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;

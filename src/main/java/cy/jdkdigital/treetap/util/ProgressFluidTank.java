@@ -19,7 +19,7 @@ public class ProgressFluidTank extends FluidTank
     @Override
     public @NotNull FluidStack drain(int maxDrain, IFluidHandler.FluidAction action) {
         FluidStack drained = super.drain(maxDrain, action);
-        if (this.blockEntity.currentRecipe != null) {
+        if (this.blockEntity.currentRecipe != null && !drained.isEmpty()) {
             int drainedProgress = Math.max(1, (int) (this.blockEntity.currentRecipe.processingTime / 1000f * drained.getAmount()));
             if (this.blockEntity.progress > drainedProgress) {
                 if (action.equals(IFluidHandler.FluidAction.EXECUTE)) {

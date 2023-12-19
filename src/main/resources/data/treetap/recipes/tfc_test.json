@@ -1,7 +1,7 @@
 {
   "type": "treetap:tap_extract",
   "log": {
-    "item": "tfc:wood/log/spruce"
+    "item": "tfc:wood/log/pine"
   },
   "processing_time": 1200,
   "metal_result": {
@@ -18,6 +18,10 @@
     {
       "type": "forge:mod_loaded",
       "modid": "tfc"
+    },
+    {
+      "type": "forge:mod_loaded",
+      "modid": "thismoddoesnotexist"
     }
   ]
 }

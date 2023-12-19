@@ -5,5 +5,6 @@
   "item.treetap.tap.modifier": "Speed modifier: %s",
   "jei.treetap.tap_extract": "Tree Tapping",
   "jei.treetap.life_cycle.months": "%s",
-  "jei.treetap.life_cycle.all_year": "All year"
+  "jei.treetap.life_cycle.all_year": "All year",
+  "config.jade.plugin_treetap.tap": "Tap"
 }

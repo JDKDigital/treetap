@@ -52,16 +52,17 @@ public class TapBlockEntity extends BlockEntity
                 blockEntity.hasSearchedForRecipe = true;
             } else if (blockEntity.currentRecipe != null) {
                 if (CompatHandler.canProcess(blockEntity.currentRecipe)) {
-                    float mod = 1f;
-                    if (state.getBlock() instanceof TapBlock tapBlock) {
-                        mod = tapBlock.getModifier();
-                    }
 
                     int tickRate = TreeTap.recipeTickrate(blockEntity.currentRecipe);
                     if (++blockEntity.counter % tickRate == 0) {
                         if (sapCollector.progress > blockEntity.currentRecipe.processingTime) {
                             sapCollector.progress = blockEntity.currentRecipe.processingTime;
                         } else {
+                            float mod = 1f;
+                            if (state.getBlock() instanceof TapBlock tapBlock) {
+                                mod = tapBlock.getModifier(level, pos);
+                            }
+
                             sapCollector.addProgress((int)(tickRate * mod));
                             level.sendBlockUpdated(pos.below(), sapCollector.getBlockState(), sapCollector.getBlockState(), Block.UPDATE_CLIENTS);
                         }
