@@ -6,7 +6,7 @@
   "required_block_count": 10,
   "processing_time": 1200,
   "result": {
-    "item": "minecraft:water_bucket"
+    "id": "minecraft:water_bucket"
   },
   "collect_bucket": true,
   "fluid_color": "#ce9e11",

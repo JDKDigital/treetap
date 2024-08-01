@@ -13,7 +13,7 @@ import snownee.jade.api.config.IPluginConfig;
 
 public class TapBlockEntityProvider implements IBlockComponentProvider
 {
-    public static final ResourceLocation UID = new ResourceLocation(TreeTap.MODID, "tap");
+    public static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(TreeTap.MODID, "tap");
 
     static final TapBlockEntityProvider INSTANCE = new TapBlockEntityProvider();
 

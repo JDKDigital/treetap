@@ -6,29 +6,29 @@ import cy.jdkdigital.treetap.util.ProgressFluidTank;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class SapCollectorBlockEntity extends BlockEntity
 {
     public int progress = 0;
-    public TapExtractRecipe currentRecipe;
+    public RecipeHolder<TapExtractRecipe> currentRecipe;
 
-    private LazyOptional<IItemHandlerModifiable> inventoryHandler = LazyOptional.of(() -> new ItemStackHandler(1)
+    private IItemHandlerModifiable inventoryHandler = new ItemStackHandler(1)
     {
         @Override
         public boolean isItemValid(int slot, @NotNull ItemStack stack) {
@@ -44,27 +44,25 @@ public class SapCollectorBlockEntity extends BlockEntity
             }
             return out;
         }
-    });
+    };
 
-    private LazyOptional<IFluidHandler> fluidHandler = LazyOptional.of(() -> new ProgressFluidTank(1000, this));
+    private IFluidHandler fluidHandler = new ProgressFluidTank(1000, this);
 
     public SapCollectorBlockEntity(BlockPos pos, BlockState state) {
         super(TreeTap.SAP_COLLECTOR_BLOCK_ENTITY.get(), pos, state);
     }
 
-    public void setCurrentRecipe(TapExtractRecipe recipe) {
+    public void setCurrentRecipe(RecipeHolder<TapExtractRecipe> recipe) {
         this.currentRecipe = recipe;
         // Reset fluid handler
         if (currentRecipe != null) {
-            fluidHandler.invalidate();
-            currentRecipe.getResultItem(getBlockState()).getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).ifPresent(outHandler -> {
-                fluidHandler = LazyOptional.of(() -> new ProgressFluidTank(outHandler.getTankCapacity(0), this));
+            var itemCap = currentRecipe.value().getResultItem(getBlockState()).getCapability(Capabilities.FluidHandler.ITEM);
+            if (itemCap != null) {
+                fluidHandler = new ProgressFluidTank(1000, this);
                 if (progress > 0) {
-                    fluidHandler.ifPresent(h -> {
-                        h.fill(new FluidStack(outHandler.getFluidInTank(0).getFluid(), (int) (outHandler.getTankCapacity(0) * ((float) progress / (float) currentRecipe.processingTime))), IFluidHandler.FluidAction.EXECUTE);
-                    });
+                    itemCap.fill(new FluidStack(fluidHandler.getFluidInTank(0).getFluid(), (int) (fluidHandler.getTankCapacity(0) * ((float) progress / (float) currentRecipe.value().processingTime))), IFluidHandler.FluidAction.EXECUTE);
                 }
-            });
+            };
         }
     }
 
@@ -72,52 +70,33 @@ public class SapCollectorBlockEntity extends BlockEntity
         if (currentRecipe != null) {
             this.progress += progress;
 
-            var fluidCap = currentRecipe.getResultItem(getBlockState()).getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
-            if (fluidCap.isPresent()) {
-                fluidCap.ifPresent(fluidHandlerItem -> {
-                    fluidHandler.ifPresent(h -> {
-                        if (h.getFluidInTank(0).isEmpty()) {
-                            h.fill(new FluidStack(fluidHandlerItem.getFluidInTank(0), (int)(1000f * ((float)this.progress / (float)currentRecipe.processingTime))), IFluidHandler.FluidAction.EXECUTE);
-                        } else {
-                            h.getFluidInTank(0).setAmount((int)(1000f * ((float)this.progress / (float)currentRecipe.processingTime)));
-                        }
-                    });
-                });
-            } else if (this.progress >= currentRecipe.processingTime) {
-                inventoryHandler.ifPresent(h -> {
-                    h.setStackInSlot(0, currentRecipe.getResultItem(getBlockState()));
-                });
+            var fluidCap = currentRecipe.value().getResultItem(getBlockState()).getCapability(Capabilities.FluidHandler.ITEM);
+            if (fluidCap != null) {
+                if (fluidHandler.getFluidInTank(0).isEmpty()) {
+                    fluidHandler.fill(new FluidStack(fluidCap.getFluidInTank(0).getFluid(), (int)(1000f * ((float)this.progress / (float)currentRecipe.value().processingTime))), IFluidHandler.FluidAction.EXECUTE);
+                } else {
+                    fluidHandler.getFluidInTank(0).setAmount((int)(1000f * ((float)this.progress / (float)currentRecipe.value().processingTime)));
+                }
+            } else if (this.progress >= currentRecipe.value().processingTime) {
+                inventoryHandler.setStackInSlot(0, currentRecipe.value().getResultItem(getBlockState()));
             }
         }
     }
 
     @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (currentRecipe != null) {
-            if (cap.equals(ForgeCapabilities.FLUID_HANDLER) && currentRecipe.getResultItem(getBlockState()).getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent()) {
-                return fluidHandler.cast();
-            } else if (cap.equals(ForgeCapabilities.ITEM_HANDLER)) {
-                return inventoryHandler.cast();
-            }
-        }
-        return super.getCapability(cap, side);
+    protected void loadAdditional(CompoundTag pTag, HolderLookup.Provider pRegistries) {
+        this.loadPacketNBT(pTag, pRegistries);
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        this.loadPacketNBT(tag);
+    protected void saveAdditional(CompoundTag pTag, HolderLookup.Provider pRegistries) {
+        super.saveAdditional(pTag, pRegistries);
+        this.savePacketNBT(pTag, pRegistries);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        this.savePacketNBT(tag);
-    }
-
-    @Override
-    public @NotNull CompoundTag getUpdateTag() {
-        return saveWithId();
+    public @NotNull CompoundTag getUpdateTag(HolderLookup.Provider pRegistries) {
+        return saveWithId(pRegistries);
     }
 
     @Override
@@ -126,26 +105,26 @@ public class SapCollectorBlockEntity extends BlockEntity
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        super.onDataPacket(net, pkt);
-        this.loadPacketNBT(pkt.getTag());
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
+        super.onDataPacket(net, pkt, lookupProvider);
+        this.loadPacketNBT(pkt.getTag(), lookupProvider);
         if (level instanceof ClientLevel) {
             level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 0);
         }
     }
 
-    public void loadPacketNBT(CompoundTag tag) {
+    public void loadPacketNBT(CompoundTag tag, HolderLookup.Provider lookupProvider) {
         this.progress = tag.getInt("progress");
         if (tag.contains("recipe") && level != null) {
-            var recipe = level.getRecipeManager().byKey(new ResourceLocation(tag.getString("recipe")));
-            recipe.ifPresent(value -> this.setCurrentRecipe((TapExtractRecipe) value));
+            var recipe = level.getRecipeManager().byKey(ResourceLocation.parse(tag.getString("recipe")));
+            recipe.ifPresent(value -> this.setCurrentRecipe((RecipeHolder<TapExtractRecipe>) value));
         }
     }
 
-    public void savePacketNBT(CompoundTag tag) {
+    public void savePacketNBT(CompoundTag tag, HolderLookup.Provider lookupProvider) {
         tag.putInt("progress", progress);
         if (this.currentRecipe != null) {
-            tag.putString("recipe", this.currentRecipe.getId().toString());
+            tag.putString("recipe", this.currentRecipe.id().toString());
         }
     }
 }

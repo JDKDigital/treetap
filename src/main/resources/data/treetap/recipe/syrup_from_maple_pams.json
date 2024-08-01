@@ -5,7 +5,7 @@
   },
   "processing_time": 1200,
   "result": {
-    "item": "pamhc2trees:maplesyrupitem"
+    "id": "pamhc2trees:maplesyrupitem"
   },
   "fluid_color": "#bb9351",
   "conditions": [

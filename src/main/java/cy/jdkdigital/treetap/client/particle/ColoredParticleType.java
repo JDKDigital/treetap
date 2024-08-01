@@ -1,11 +1,10 @@
 package cy.jdkdigital.treetap.client.particle;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -14,30 +13,21 @@ public class ColoredParticleType extends ParticleType<ColoredParticleType> imple
 {
     private float[] color = null;
 
-    private static final Deserializer<ColoredParticleType> DESERIALIZER = new Deserializer<>()
-    {
-        @Nonnull
-        @Override
-        public ColoredParticleType fromCommand(@Nonnull ParticleType<ColoredParticleType> particleType, @Nonnull StringReader stringReader) {
-            return (ColoredParticleType) particleType;
-        }
-
-        @Nonnull
-        @Override
-        public ColoredParticleType fromNetwork(@Nonnull ParticleType<ColoredParticleType> particleType, @Nonnull FriendlyByteBuf buffer) {
-            return (ColoredParticleType) particleType;
-        }
-    };
-
-    private final Codec<ColoredParticleType> codec = Codec.unit(this::getType);
+    private final MapCodec<ColoredParticleType> codec = MapCodec.unit(this::getType);
+    private final StreamCodec<RegistryFriendlyByteBuf, ColoredParticleType> streamCodec = StreamCodec.unit(this);
 
     @Override
-    public Codec<ColoredParticleType> codec() {
+    public MapCodec<ColoredParticleType> codec() {
         return codec;
     }
 
+    @Override
+    public StreamCodec<? super RegistryFriendlyByteBuf, ColoredParticleType> streamCodec() {
+        return streamCodec;
+    }
+
     public ColoredParticleType() {
-        super(false, DESERIALIZER);
+        super(false);
     }
 
     public void setColor(float[] color) {
@@ -53,15 +43,5 @@ public class ColoredParticleType extends ParticleType<ColoredParticleType> imple
     @Override
     public ColoredParticleType getType() {
         return this;
-    }
-
-    @Override
-    public void writeToNetwork(@Nonnull FriendlyByteBuf packetBuffer) {
-    }
-
-    @Nonnull
-    @Override
-    public String writeToString() {
-        return ForgeRegistries.PARTICLE_TYPES.getKey(this).toString();
     }
 }

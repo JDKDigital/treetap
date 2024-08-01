@@ -15,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 
 import javax.annotation.Nonnull;
@@ -24,7 +25,7 @@ import java.util.List;
 @JeiPlugin
 public class TreeTapJeiPlugin implements IModPlugin
 {
-    private static final ResourceLocation pluginId = new ResourceLocation(TreeTap.MODID, TreeTap.MODID);
+    private static final ResourceLocation pluginId = ResourceLocation.fromNamespaceAndPath(TreeTap.MODID, TreeTap.MODID);
 
     public static final RecipeType<TapExtractRecipe> TAP_EXTRACT_TYPE = RecipeType.create(TreeTap.MODID, "tap_extract", TapExtractRecipe.class);
 
@@ -56,7 +57,7 @@ public class TreeTapJeiPlugin implements IModPlugin
     public void registerRecipes(IRecipeRegistration registration) {
         RecipeManager recipeManager = Minecraft.getInstance().level.getRecipeManager();
 
-        List<TapExtractRecipe> bottlerRecipeMap = recipeManager.getAllRecipesFor(TreeTap.TAP_RECIPE_TYPE.get());
-        registration.addRecipes(TAP_EXTRACT_TYPE, bottlerRecipeMap);
+        List<RecipeHolder<TapExtractRecipe>> bottlerRecipeMap = recipeManager.getAllRecipesFor(TreeTap.TAP_RECIPE_TYPE.get());
+        registration.addRecipes(TAP_EXTRACT_TYPE, bottlerRecipeMap.stream().map(RecipeHolder::value).toList());
     }
 }

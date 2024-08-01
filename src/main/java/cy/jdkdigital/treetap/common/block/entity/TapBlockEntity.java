@@ -7,23 +7,24 @@ import cy.jdkdigital.treetap.compat.CompatHandler;
 import cy.jdkdigital.treetap.util.ColorUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import org.jetbrains.annotations.NotNull;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 
 public class TapBlockEntity extends BlockEntity
 {
     private int counter = 0;
-    public TapExtractRecipe currentRecipe;
+    public RecipeHolder<TapExtractRecipe> currentRecipe;
     public boolean hasSearchedForRecipe = false;
 
     public TapBlockEntity(BlockPos pos, BlockState state) {
@@ -39,11 +40,11 @@ public class TapBlockEntity extends BlockEntity
                 sapCollector.setCurrentRecipe(blockEntity.currentRecipe);
                 if (blockEntity.currentRecipe != null) {
                     level.setBlockAndUpdate(pos, state.setValue(BlockStateProperties.ATTACHED, true));
-                    if (!blockEntity.currentRecipe.fluidColor.isEmpty()) {
-                        TapBlock.color.put(pos, ColorUtil.getCacheColor(ColorUtil.getCacheColor(blockEntity.currentRecipe.fluidColor)));
+                    if (!blockEntity.currentRecipe.value().fluidColor.isEmpty()) {
+                        TapBlock.color.put(pos, ColorUtil.getCacheColor(ColorUtil.getCacheColor(blockEntity.currentRecipe.value().fluidColor)));
                     } else {
-                        IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(blockEntity.currentRecipe.displayFluid.getFluid());
-                        int fluidTintColour = renderProperties.getTintColor(blockEntity.currentRecipe.displayFluid);
+                        IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(blockEntity.currentRecipe.value().displayFluid.getFluid());
+                        int fluidTintColour = renderProperties.getTintColor(blockEntity.currentRecipe.value().displayFluid);
                         TapBlock.color.put(pos, ColorUtil.getCacheColor(fluidTintColour));
                     }
                 } else {
@@ -55,8 +56,8 @@ public class TapBlockEntity extends BlockEntity
 
                     int tickRate = TreeTap.recipeTickrate(blockEntity.currentRecipe);
                     if (++blockEntity.counter % tickRate == 0) {
-                        if (sapCollector.progress > blockEntity.currentRecipe.processingTime) {
-                            sapCollector.progress = blockEntity.currentRecipe.processingTime;
+                        if (sapCollector.progress > blockEntity.currentRecipe.value().processingTime) {
+                            sapCollector.progress = blockEntity.currentRecipe.value().processingTime;
                         } else {
                             float mod = 1f;
                             if (state.getBlock() instanceof TapBlock tapBlock) {
@@ -83,20 +84,20 @@ public class TapBlockEntity extends BlockEntity
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        this.loadPacketNBT(tag);
+    protected void loadAdditional(CompoundTag pTag, HolderLookup.Provider pRegistries) {
+        super.loadAdditional(pTag, pRegistries);
+        this.loadPacketNBT(pTag, pRegistries);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        this.savePacketNBT(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider pRegistries) {
+        super.saveAdditional(tag, pRegistries);
+        this.savePacketNBT(tag, pRegistries);
     }
 
     @Override
-    public @NotNull CompoundTag getUpdateTag() {
-        return saveWithId();
+    public CompoundTag getUpdateTag(HolderLookup.Provider pRegistries) {
+        return saveWithId(pRegistries);
     }
 
     @Override
@@ -105,24 +106,24 @@ public class TapBlockEntity extends BlockEntity
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        super.onDataPacket(net, pkt);
-        this.loadPacketNBT(pkt.getTag());
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
+        super.onDataPacket(net, pkt, lookupProvider);
+        this.loadPacketNBT(pkt.getTag(), lookupProvider);
         if (level instanceof ClientLevel) {
             level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 0);
         }
     }
 
-    public void loadPacketNBT(CompoundTag tag) {
+    public void loadPacketNBT(CompoundTag tag, HolderLookup.Provider pRegistries) {
         if (tag.contains("recipe") && level != null) {
-            var recipe = level.getRecipeManager().byKey(new ResourceLocation(tag.getString("recipe")));
-            recipe.ifPresent(value -> this.currentRecipe = (TapExtractRecipe) value);
+            var recipe = level.getRecipeManager().byKey(ResourceLocation.parse(tag.getString("recipe")));
+            recipe.ifPresent(value -> this.currentRecipe = (RecipeHolder<TapExtractRecipe>) value);
         }
     }
 
-    public void savePacketNBT(CompoundTag tag) {
+    public void savePacketNBT(CompoundTag tag, HolderLookup.Provider pRegistries) {
         if (this.currentRecipe != null) {
-            tag.putString("recipe", this.currentRecipe.getId().toString());
+            tag.putString("recipe", this.currentRecipe.id().toString());
         }
     }
 }

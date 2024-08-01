@@ -1,32 +1,26 @@
 package cy.jdkdigital.treetap.common.block.recipe;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import cy.jdkdigital.treetap.TreeTap;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.Container;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
+import java.util.List;
 
-public class TapExtractRecipe implements Recipe<Container>
+public class TapExtractRecipe implements Recipe<RecipeInput>
 {
-    private final ResourceLocation id;
     public final Ingredient input;
     public final ItemStack itemOutput;
     public final ItemStack woodenItemOutput;
@@ -35,11 +29,10 @@ public class TapExtractRecipe implements Recipe<Container>
     public final int processingTime;
     public final String fluidColor;
     public final FluidStack displayFluid;
-    public final int[] lifeCycles;
+    public final List<Integer> lifeCycles;
     public final int requiredBlocks;
 
-    public TapExtractRecipe(ResourceLocation id, Ingredient input, ItemStack itemOutput, ItemStack woodenItemOutput, Ingredient harvestItem, boolean collectBucket, int processingTime, FluidStack displayFluid, String fluidColor, int requiredBlocks, int[] lifeCycles) {
-        this.id = id;
+    public TapExtractRecipe(Ingredient input, ItemStack itemOutput, ItemStack woodenItemOutput, Ingredient harvestItem, boolean collectBucket, int processingTime, FluidStack displayFluid, String fluidColor, int requiredBlocks, List<Integer> lifeCycles) {
         this.input = input;
         this.itemOutput = itemOutput;
         this.woodenItemOutput = woodenItemOutput;
@@ -53,12 +46,12 @@ public class TapExtractRecipe implements Recipe<Container>
     }
 
     @Override
-    public boolean matches(Container container, Level level) {
+    public boolean matches(RecipeInput container, Level level) {
         return false;
     }
 
     @Override
-    public @NotNull ItemStack assemble(Container container, RegistryAccess level) {
+    public @NotNull ItemStack assemble(RecipeInput container, HolderLookup.Provider pRegistries) {
         return ItemStack.EMPTY;
     }
 
@@ -68,18 +61,13 @@ public class TapExtractRecipe implements Recipe<Container>
     }
 
     @Override
-    public @NotNull ItemStack getResultItem(RegistryAccess level) {
+    public ItemStack getResultItem(HolderLookup.Provider pRegistries) {
         return ItemStack.EMPTY;
     }
 
     public ItemStack getResultItem(BlockState blockState) {
         boolean woodResult = blockState.is(TreeTap.WOODEN_SAP_COLLECTOR.get());
         return woodResult ? woodenItemOutput.copy() : itemOutput.copy();
-    }
-
-    @Override
-    public @NotNull ResourceLocation getId() {
-        return id;
     }
 
     @Override
@@ -92,95 +80,75 @@ public class TapExtractRecipe implements Recipe<Container>
         return TreeTap.TAP_RECIPE_TYPE.get();
     }
 
-    public static class Serializer<T extends TapExtractRecipe> implements RecipeSerializer<T>
+    public static class Serializer implements RecipeSerializer<TapExtractRecipe>
     {
-        final TapExtractRecipe.Serializer.IRecipeFactory<T> factory;
+        private static final MapCodec<TapExtractRecipe> CODEC = RecordCodecBuilder.mapCodec(
+                builder -> builder.group(
+                                Ingredient.CODEC.fieldOf("log").forGetter(recipe -> recipe.input),
+                                ItemStack.CODEC.fieldOf("result").forGetter(recipe -> recipe.itemOutput),
+                                ItemStack.CODEC.fieldOf("wooden_result").orElse(ItemStack.EMPTY).forGetter(recipe -> recipe.woodenItemOutput),
+                                Ingredient.CODEC.fieldOf("harvest_item").orElse(Ingredient.EMPTY).forGetter(recipe -> recipe.harvestItem),
+                                Codec.BOOL.fieldOf("collect_bucket").orElse(false).forGetter(recipe -> recipe.collectBucket),
+                                Codec.INT.fieldOf("processing_time").orElse(1000).forGetter(recipe -> recipe.processingTime),
+                                FluidStack.CODEC.fieldOf("display_fluid").orElse(new FluidStack(Fluids.WATER, 1000)).forGetter(recipe -> recipe.displayFluid),
+                                Codec.STRING.fieldOf("fluid_color").orElse("").forGetter(recipe -> recipe.fluidColor),
+                                Codec.INT.fieldOf("required_block_count").orElse(1).forGetter(recipe -> recipe.requiredBlocks),
+                                Codec.INT.listOf().fieldOf("life_cycle").orElse(List.of(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)).forGetter(recipe -> recipe.lifeCycles)
+                        )
+                        .apply(builder, TapExtractRecipe::new)
+        );
 
-        public Serializer(TapExtractRecipe.Serializer.IRecipeFactory<T> factory) {
-            this.factory = factory;
-        }
+        public static final StreamCodec<RegistryFriendlyByteBuf, TapExtractRecipe> STREAM_CODEC = StreamCodec.of(
+                TapExtractRecipe.Serializer::toNetwork, TapExtractRecipe.Serializer::fromNetwork
+        );
 
-        @Nonnull
         @Override
-        public T fromJson(ResourceLocation id, JsonObject json) {
-            Ingredient input;
-            if (GsonHelper.isArrayNode(json, "log")) {
-                input = Ingredient.fromJson(GsonHelper.getAsJsonArray(json, "log"));
-            } else {
-                input = Ingredient.fromJson(GsonHelper.getAsJsonObject(json, "log"));
-            }
-            ItemStack metalTtemOutput = ItemStack.EMPTY;
-            if (json.has("result")) {
-                metalTtemOutput = CraftingHelper.getItemStack(GsonHelper.getAsJsonObject(json, "result"), true);
-            } else if (json.has("metal_result")) {
-                metalTtemOutput = CraftingHelper.getItemStack(GsonHelper.getAsJsonObject(json, "metal_result"), true);
-            }
-            ItemStack woodenItemOutput = metalTtemOutput.copy();
-            if (json.has("wooden_result")) {
-                woodenItemOutput = CraftingHelper.getItemStack(GsonHelper.getAsJsonObject(json, "wooden_result"), true);
-            }
-            Ingredient harvestItem = Ingredient.EMPTY;
-            if (json.has("harvest_item")) {
-                if (GsonHelper.isArrayNode(json, "harvest_item")) {
-                    harvestItem = Ingredient.fromJson(GsonHelper.getAsJsonArray(json, "harvest_item"));
-                } else {
-                    harvestItem = Ingredient.fromJson(GsonHelper.getAsJsonObject(json, "harvest_item"));
-                }
-            }
-
-            // TFC compatibility
-            int[] lifeCycles = new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-            if (json.has("life_cycle")) {
-                if (GsonHelper.isArrayNode(json, "life_cycle")) {
-                    var jsonLifeCycles = GsonHelper.getAsJsonArray(json, "life_cycle");
-                    for (int i = 0; i < jsonLifeCycles.size(); ++i) {
-                        lifeCycles[i] = jsonLifeCycles.get(i).getAsInt();
-                    }
-                }
-            }
-
-            Fluid displayFluid = Fluids.WATER;
-            if (json.has("display_fluid")) {
-                JsonObject fluidJson = GsonHelper.getAsJsonObject(json, "display_fluid");
-                if (fluidJson.has("fluid")) {
-                    displayFluid = Objects.requireNonNull(ForgeRegistries.FLUIDS.getValue(new ResourceLocation(GsonHelper.getAsString(fluidJson, "fluid"))));
-                }
-            }
-            String fluidColor = json.has("fluid_color") ? json.get("fluid_color").getAsString() : "";
-
-            return this.factory.create(id, input, metalTtemOutput, woodenItemOutput, harvestItem, GsonHelper.getAsBoolean(json, "collect_bucket", false), GsonHelper.getAsInt(json, "processing_time", 1000), new FluidStack(displayFluid, 1000), fluidColor, GsonHelper.getAsInt(json, "required_block_count", 1), lifeCycles);
+        public MapCodec<TapExtractRecipe> codec() {
+            return CODEC;
         }
 
-        public T fromNetwork(@Nonnull ResourceLocation id, @Nonnull FriendlyByteBuf buffer) {
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, TapExtractRecipe> streamCodec() {
+            return STREAM_CODEC;
+        }
+
+        public static TapExtractRecipe fromNetwork(@Nonnull RegistryFriendlyByteBuf buffer) {
             try {
-                return this.factory.create(id, Ingredient.fromNetwork(buffer), buffer.readItem(), buffer.readItem(), Ingredient.fromNetwork(buffer), buffer.readBoolean(), buffer.readInt(), buffer.readFluidStack(), buffer.readUtf(), buffer.readInt(), buffer.readVarIntArray());
+                return new TapExtractRecipe(
+                        Ingredient.CONTENTS_STREAM_CODEC.decode(buffer),
+                        ItemStack.STREAM_CODEC.decode(buffer),
+//                        ItemStack.STREAM_CODEC.decode(buffer),
+                        ItemStack.EMPTY,
+                        Ingredient.CONTENTS_STREAM_CODEC.decode(buffer),
+                        buffer.readBoolean(),
+                        buffer.readInt(),
+                        FluidStack.STREAM_CODEC.decode(buffer),
+                        buffer.readUtf(),
+                        buffer.readInt(),
+                        buffer.readList(FriendlyByteBuf::readInt)
+                );
             } catch (Exception e) {
-                TreeTap.LOGGER.error("Error reading tap extract recipe from packet. " + id, e);
+                TreeTap.LOGGER.error("Error reading tap extract recipe from packet.", e);
                 throw e;
             }
         }
 
-        public void toNetwork(@Nonnull FriendlyByteBuf buffer, T recipe) {
+        public static void toNetwork(@Nonnull RegistryFriendlyByteBuf buffer, TapExtractRecipe recipe) {
             try {
-                recipe.input.toNetwork(buffer);
-                buffer.writeItem(recipe.itemOutput);
-                buffer.writeItem(recipe.woodenItemOutput);
-                recipe.harvestItem.toNetwork(buffer);
+                Ingredient.CONTENTS_STREAM_CODEC.encode(buffer, recipe.input);
+                ItemStack.STREAM_CODEC.encode(buffer, recipe.itemOutput);
+//                ItemStack.STREAM_CODEC.encode(buffer, recipe.woodenItemOutput);
+                Ingredient.CONTENTS_STREAM_CODEC.encode(buffer, recipe.harvestItem);
                 buffer.writeBoolean(recipe.collectBucket);
                 buffer.writeInt(recipe.processingTime);
-                buffer.writeFluidStack(recipe.displayFluid);
+                FluidStack.STREAM_CODEC.encode(buffer, recipe.displayFluid);
                 buffer.writeUtf(recipe.fluidColor);
                 buffer.writeInt(recipe.requiredBlocks);
-                buffer.writeVarIntArray(recipe.lifeCycles);
+                buffer.writeCollection(recipe.lifeCycles, FriendlyByteBuf::writeInt);
             } catch (Exception e) {
-                TreeTap.LOGGER.error("Error writing tap extract recipe to packet. " + recipe.getId(), e);
+                TreeTap.LOGGER.error("Error writing tap extract recipe to packet.", e);
                 throw e;
             }
-        }
-
-        public interface IRecipeFactory<T extends TapExtractRecipe>
-        {
-            T create(ResourceLocation id, Ingredient input, ItemStack metalItemOutput, ItemStack woodenItemOutput, Ingredient harvestItem, boolean fluidOutput, int processingTime, FluidStack displayFluid, String fluidColor, int requiredBlocks, int[] lifeCycles);
         }
     }
 }

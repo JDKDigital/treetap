@@ -15,8 +15,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Matrix4f;
 
 import javax.annotation.Nonnull;
@@ -35,7 +35,7 @@ public class SapCollectorBlockEntityRenderer implements BlockEntityRenderer<SapC
 
             // fluid rendering starts here //
             //get info on type of fluid
-            FluidStack fluidStack = blockEntity.currentRecipe.displayFluid;
+            FluidStack fluidStack = blockEntity.currentRecipe.value().displayFluid;
             Fluid fluid = fluidStack.getFluid();
 
             //fluid brightness info
@@ -43,7 +43,7 @@ public class SapCollectorBlockEntityRenderer implements BlockEntityRenderer<SapC
 
             //fluid colour tint info
             IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid);
-            int fluidTintColour = blockEntity.currentRecipe.fluidColor.isEmpty() ? renderProperties.getTintColor(fluidStack) : ColorUtil.getCacheColor(blockEntity.currentRecipe.fluidColor);
+            int fluidTintColour = blockEntity.currentRecipe.value().fluidColor.isEmpty() ? renderProperties.getTintColor(fluidStack) : ColorUtil.getCacheColor(blockEntity.currentRecipe.value().fluidColor);
             float[] color = ColorUtil.getCacheColor(fluidTintColour);
 
             // No invisible fluids please
@@ -56,7 +56,7 @@ public class SapCollectorBlockEntityRenderer implements BlockEntityRenderer<SapC
             //fluid render info
             Matrix4f lastPose = poseStack.last().pose();
 
-            float progress = (float)blockEntity.progress / (float)blockEntity.currentRecipe.processingTime;
+            float progress = (float)blockEntity.progress / (float)blockEntity.currentRecipe.value().processingTime;
             float fluidY = (4.0f + (9f * progress)) / 16f;
 
             Direction dir = blockEntity.getBlockState().getValue(HorizontalDirectionalBlock.FACING);
@@ -90,13 +90,13 @@ public class SapCollectorBlockEntityRenderer implements BlockEntityRenderer<SapC
             float fluidSpriteV0 = stillFluidSprite.getV0() + (stillFluidSprite.getV1() - stillFluidSprite.getV0()) / 8;
             float fluidSpriteV1 = stillFluidSprite.getV1() - (stillFluidSprite.getV1() - stillFluidSprite.getV0()) / 8;
             //north-west
-            vertexBuffer.vertex(lastPose, x1, fluidY, z1).color(color[0], color[1], color[2], color[3]).uv(fluidSpriteU0, fluidSpriteV1).overlayCoords(combinedOverlayIn).uv2(fluidBrightness).normal(0, 0, 1).endVertex();
+            vertexBuffer.addVertex(lastPose, x1, fluidY, z1).setColor(color[0], color[1], color[2], color[3]).setUv(fluidSpriteU0, fluidSpriteV1).setOverlay(combinedOverlayIn).setLight(fluidBrightness).setNormal(0, 0, 1);
             //south-west
-            vertexBuffer.vertex(lastPose, x1, fluidY, z2).color(color[0], color[1], color[2], color[3]).uv(fluidSpriteU0, fluidSpriteV0).overlayCoords(combinedOverlayIn).uv2(fluidBrightness).normal(0, 0, 1).endVertex();
+            vertexBuffer.addVertex(lastPose, x1, fluidY, z2).setColor(color[0], color[1], color[2], color[3]).setUv(fluidSpriteU0, fluidSpriteV0).setOverlay(combinedOverlayIn).setLight(fluidBrightness).setNormal(0, 0, 1);
             //south-east
-            vertexBuffer.vertex(lastPose, x2, fluidY, z2).color(color[0], color[1], color[2], color[3]).uv(fluidSpriteU1, fluidSpriteV0).overlayCoords(combinedOverlayIn).uv2(fluidBrightness).normal(0, 0, 1).endVertex();
+            vertexBuffer.addVertex(lastPose, x2, fluidY, z2).setColor(color[0], color[1], color[2], color[3]).setUv(fluidSpriteU1, fluidSpriteV0).setOverlay(combinedOverlayIn).setLight(fluidBrightness).setNormal(0, 0, 1);
             //north-east
-            vertexBuffer.vertex(lastPose, x2, fluidY, z1).color(color[0], color[1], color[2], color[3]).uv(fluidSpriteU1, fluidSpriteV1).overlayCoords(combinedOverlayIn).uv2(fluidBrightness).normal(0, 0, 1).endVertex();
+            vertexBuffer.addVertex(lastPose, x2, fluidY, z1).setColor(color[0], color[1], color[2], color[3]).setUv(fluidSpriteU1, fluidSpriteV1).setOverlay(combinedOverlayIn).setLight(fluidBrightness).setNormal(0, 0, 1);
 
             poseStack.popPose();
         }

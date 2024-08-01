@@ -12,7 +12,7 @@ public class ColorUtil
 
     public static Integer getCacheColor(String color) {
         if (!stringColorCache.containsKey(color)) {
-            stringColorCache.put(color, TextColor.parseColor(color).getValue());
+            stringColorCache.put(color, TextColor.parseColor(color).result().get().getValue());
         }
         return stringColorCache.get(color);
     }

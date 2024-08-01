@@ -5,7 +5,7 @@
   },
   "processing_time": 1200,
   "result": {
-    "item": "minecraft:water_bucket"
+    "id": "minecraft:water_bucket"
   },
   "collect_bucket": true,
   "display_fluid": {

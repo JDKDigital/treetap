@@ -1,5 +1,6 @@
 package cy.jdkdigital.treetap.common.block;
 
+import com.mojang.serialization.MapCodec;
 import cy.jdkdigital.treetap.TreeTap;
 import cy.jdkdigital.treetap.common.block.entity.SapCollectorBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -11,6 +12,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -36,6 +38,8 @@ import java.util.Map;
 
 public class SapCollectorBlock extends BaseEntityBlock
 {
+    public static final MapCodec<SapCollectorBlock> CODEC = simpleCodec(SapCollectorBlock::new);
+
     private static final Map<Direction, VoxelShape> SHAPES = new HashMap<>() {{
         put(Direction.NORTH, Shapes.join(box(2.5D, 4D, 5D, 13.5D, 14D, 16D), box(3.5D, 5D, 6D, 12.5D, 14D, 15D), BooleanOp.ONLY_FIRST));
         put(Direction.SOUTH, Shapes.join(box(2.5D, 4D, 0D, 13.5D, 14D, 11D), box(3.5D, 5D, 1D, 12.5D, 14D, 10D), BooleanOp.ONLY_FIRST));
@@ -47,6 +51,11 @@ public class SapCollectorBlock extends BaseEntityBlock
         super(properties);
 
         this.registerDefaultState(this.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH));
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
     }
 
     @Nullable
@@ -103,43 +112,41 @@ public class SapCollectorBlock extends BaseEntityBlock
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
         var tag = state.is(TreeTap.WOODEN_SAP_COLLECTOR.get()) ? TreeTap.WOODEN_BUCKETS : TreeTap.METAL_BUCKETS;
         var bucketItem = BuiltInRegistries.ITEM.getTagOrEmpty(tag).iterator();
         return bucketItem.hasNext() ? new ItemStack(bucketItem.next()) : ItemStack.EMPTY;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (!level.isClientSide) {
-            var blockEntity = level.getBlockEntity(pos);
-            if (blockEntity instanceof SapCollectorBlockEntity sapCollectorBlock) {
-                if (sapCollectorBlock.currentRecipe != null && sapCollectorBlock.progress >= sapCollectorBlock.currentRecipe.processingTime) {
-                    ItemStack heldItem =player.getItemInHand(hand);
-                    boolean hasCorrectItem = sapCollectorBlock.currentRecipe.harvestItem.isEmpty() && heldItem.isEmpty() || sapCollectorBlock.currentRecipe.harvestItem.test(heldItem);
-                    if (hasCorrectItem) {
-                        if (sapCollectorBlock.currentRecipe.collectBucket) {
-                            player.setItemInHand(hand, sapCollectorBlock.currentRecipe.getResultItem(state));
-                            level.playSound(player, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS);
+    protected ItemInteractionResult useItemOn(ItemStack pStack, BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHitResult) {
+        var blockEntity = pLevel.getBlockEntity(pPos);
+        if (blockEntity instanceof SapCollectorBlockEntity sapCollectorBlock) {
+            if (sapCollectorBlock.currentRecipe != null && sapCollectorBlock.progress >= sapCollectorBlock.currentRecipe.value().processingTime) {
+                boolean hasCorrectItem = sapCollectorBlock.currentRecipe.value().harvestItem.isEmpty() && pStack.isEmpty() || sapCollectorBlock.currentRecipe.value().harvestItem.test(pStack);
+                if (hasCorrectItem) {
+                    if (!pLevel.isClientSide) {
+                        if (sapCollectorBlock.currentRecipe.value().collectBucket) {
+                            pPlayer.setItemInHand(pHand, sapCollectorBlock.currentRecipe.value().getResultItem(pState));
+                            pLevel.playSound(pPlayer, pPos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS);
                         } else {
-                            popResource(level, pos, sapCollectorBlock.currentRecipe.getResultItem(state));
-                            level.playSound(player, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS);
+                            popResource(pLevel, pPos, sapCollectorBlock.currentRecipe.value().getResultItem(pState));
+                            pLevel.playSound(pPlayer, pPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS);
                         }
-                        player.swing(hand);
-                        if (sapCollectorBlock.currentRecipe.collectBucket) {
-                            level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+                        pPlayer.swing(pHand);
+                        if (sapCollectorBlock.currentRecipe.value().collectBucket) {
+                            pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
                         }
-                        if (!sapCollectorBlock.currentRecipe.harvestItem.isEmpty() && !player.isCreative()) {
-                            heldItem.shrink(1);
+                        if (!sapCollectorBlock.currentRecipe.value().harvestItem.isEmpty() && !pPlayer.isCreative()) {
+                            pStack.shrink(1);
                         }
                         sapCollectorBlock.progress = 0;
-                        level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
-                        return InteractionResult.CONSUME;
+                        pLevel.sendBlockUpdated(pPos, pState, pState, Block.UPDATE_CLIENTS);
                     }
+                    return ItemInteractionResult.SUCCESS;
                 }
             }
         }
-        return super.use(state, level, pos, player, hand, hitResult);
+        return super.useItemOn(pStack, pState, pLevel, pPos, pPlayer, pHand, pHitResult);
     }
 }

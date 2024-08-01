@@ -1,5 +1,8 @@
 package cy.jdkdigital.treetap.common.block;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import cy.jdkdigital.treetap.TreeTap;
 import cy.jdkdigital.treetap.common.block.entity.SapCollectorBlockEntity;
 import cy.jdkdigital.treetap.common.block.entity.TapBlockEntity;
@@ -10,7 +13,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -37,6 +42,8 @@ import java.util.Map;
 
 public class TapBlock extends BaseEntityBlock
 {
+    public static final MapCodec<TapBlock> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(propertiesCodec(), Codec.FLOAT.fieldOf("modifier").forGetter(tap -> tap.getModifier(null, null))).apply(builder, TapBlock::new));
+
     private static final Map<Direction, VoxelShape> SHAPES = new HashMap<>() {{
         put(Direction.NORTH, box(6D, 3D, 9D, 10D, 10D, 16D));
         put(Direction.SOUTH, box(6D, 3D, 0D, 10D, 10D, 7D));
@@ -51,6 +58,11 @@ public class TapBlock extends BaseEntityBlock
         this.modifier = modifier;
 
         this.registerDefaultState(this.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH).setValue(BlockStateProperties.ATTACHED, false));
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
     }
 
     public float getModifier(@Nullable Level level, @Nullable BlockPos pos) {
@@ -118,22 +130,23 @@ public class TapBlock extends BaseEntityBlock
         return false;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (!level.isClientSide && level.getBlockState(pos.below()).isAir()) {
-            BlockState collectorState = player.getItemInHand(hand).is(TreeTap.METAL_BUCKETS) ? TreeTap.SAP_COLLECTOR.get().defaultBlockState() : (
-                    player.getItemInHand(hand).is(TreeTap.WOODEN_BUCKETS) ? TreeTap.WOODEN_SAP_COLLECTOR.get().defaultBlockState() : null);
+    protected ItemInteractionResult useItemOn(ItemStack pStack, BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHitResult) {
+        if (pLevel.getBlockState(pPos.below()).isAir()) {
+            BlockState collectorState = pPlayer.getItemInHand(pHand).is(TreeTap.METAL_BUCKETS) ? TreeTap.SAP_COLLECTOR.get().defaultBlockState() : (
+                    pPlayer.getItemInHand(pHand).is(TreeTap.WOODEN_BUCKETS) ? TreeTap.WOODEN_SAP_COLLECTOR.get().defaultBlockState() : null);
             if (collectorState != null) {
-                level.setBlockAndUpdate(pos.below(), collectorState.setValue(HorizontalDirectionalBlock.FACING, state.getValue(HorizontalDirectionalBlock.FACING)));
-                if (!player.isCreative()) {
-                    player.getItemInHand(hand).shrink(1);
+                if (!pLevel.isClientSide) {
+                    pLevel.setBlockAndUpdate(pPos.below(), collectorState.setValue(HorizontalDirectionalBlock.FACING, pState.getValue(HorizontalDirectionalBlock.FACING)));
+                    if (!pPlayer.isCreative()) {
+                        pPlayer.getItemInHand(pHand).shrink(1);
+                    }
                 }
-                player.swing(hand);
-                return InteractionResult.CONSUME;
+                pPlayer.swing(pHand);
+                return ItemInteractionResult.CONSUME;
             }
         }
-        return super.use(state, level, pos, player, hand, hitResult);
+        return super.useItemOn(pStack, pState, pLevel, pPos, pPlayer, pHand, pHitResult);
     }
 
     @SuppressWarnings("deprecation")

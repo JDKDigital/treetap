@@ -18,8 +18,8 @@ public class TapItem extends BlockItem
     }
 
     @Override
-    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltip, TooltipFlag pFlag) {
-        super.appendHoverText(pStack, pLevel, pTooltip, pFlag);
-        CompatHandler.appendHoverText(pTooltip, this.getBlock());
+    public void appendHoverText(ItemStack pStack, TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pTooltipFlag) {
+        super.appendHoverText(pStack, pContext, pTooltipComponents, pTooltipFlag);
+        CompatHandler.appendHoverText(pTooltipComponents, this.getBlock());
     }
 }
