@@ -14,13 +14,13 @@
   "life_cycle": [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
   "collect_bucket": true,
   "fluid_color": "#ce9e11",
-  "conditions": [
+  "neoforge:conditions": [
     {
-      "type": "forge:mod_loaded",
+      "type": "neoforge:mod_loaded",
       "modid": "tfc"
     },
     {
-      "type": "forge:mod_loaded",
+      "type": "neoforge:mod_loaded",
       "modid": "thismoddoesnotexist"
     }
   ]

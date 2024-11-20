@@ -2,7 +2,7 @@ package cy.jdkdigital.treetap.common.block.entity;
 
 import cy.jdkdigital.treetap.TreeTap;
 import cy.jdkdigital.treetap.common.block.TapBlock;
-import cy.jdkdigital.treetap.common.block.recipe.TapExtractRecipe;
+import cy.jdkdigital.treetap.common.recipe.TapExtractRecipe;
 import cy.jdkdigital.treetap.compat.CompatHandler;
 import cy.jdkdigital.treetap.util.ColorUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -40,12 +40,16 @@ public class TapBlockEntity extends BlockEntity
                 sapCollector.setCurrentRecipe(blockEntity.currentRecipe);
                 if (blockEntity.currentRecipe != null) {
                     level.setBlockAndUpdate(pos, state.setValue(BlockStateProperties.ATTACHED, true));
-                    if (!blockEntity.currentRecipe.value().fluidColor.isEmpty()) {
-                        TapBlock.color.put(pos, ColorUtil.getCacheColor(ColorUtil.getCacheColor(blockEntity.currentRecipe.value().fluidColor)));
+                    if (!blockEntity.currentRecipe.value().particleColor.isEmpty()) {
+                        TapBlock.color.put(pos, ColorUtil.getCacheColor(ColorUtil.getCacheColor(blockEntity.currentRecipe.value().particleColor)));
                     } else {
-                        IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(blockEntity.currentRecipe.value().displayFluid.getFluid());
-                        int fluidTintColour = renderProperties.getTintColor(blockEntity.currentRecipe.value().displayFluid);
-                        TapBlock.color.put(pos, ColorUtil.getCacheColor(fluidTintColour));
+                        if (!blockEntity.currentRecipe.value().fluidColor.isEmpty()) {
+                            TapBlock.color.put(pos, ColorUtil.getCacheColor(ColorUtil.getCacheColor(blockEntity.currentRecipe.value().fluidColor)));
+                        } else {
+                            IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(blockEntity.currentRecipe.value().displayFluid.getFluid());
+                            int fluidTintColour = renderProperties.getTintColor(blockEntity.currentRecipe.value().displayFluid);
+                            TapBlock.color.put(pos, ColorUtil.getCacheColor(fluidTintColour));
+                        }
                     }
                 } else {
                     level.setBlockAndUpdate(pos, state.setValue(BlockStateProperties.ATTACHED, false));

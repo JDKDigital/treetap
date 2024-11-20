@@ -1,7 +1,7 @@
 package cy.jdkdigital.treetap.compat.jei;
 
 import cy.jdkdigital.treetap.TreeTap;
-import cy.jdkdigital.treetap.common.block.recipe.TapExtractRecipe;
+import cy.jdkdigital.treetap.common.recipe.TapExtractRecipe;
 import cy.jdkdigital.treetap.compat.CompatHandler;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;

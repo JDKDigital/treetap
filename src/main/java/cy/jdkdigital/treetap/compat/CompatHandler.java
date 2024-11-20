@@ -1,7 +1,7 @@
 package cy.jdkdigital.treetap.compat;
 
 import cy.jdkdigital.treetap.TreeTap;
-import cy.jdkdigital.treetap.common.block.recipe.TapExtractRecipe;
+import cy.jdkdigital.treetap.common.recipe.TapExtractRecipe;
 import cy.jdkdigital.treetap.util.TreeUtil;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
@@ -36,9 +36,13 @@ public class CompatHandler
     }
 
     public static boolean isValidTree(LevelReader levelReader, BlockPos pos) {
-        if (ModList.get().isLoaded("tfc")) {
+        //prioritize Dynamic Trees Valid tree registration over TFC
+//        if (ModList.get().isLoaded("dynamictrees")) {
+//            return DTCompat.isValidTree(levelReader, pos);
+//        }
+//        else if (ModList.get().isLoaded("tfc")) {
 //            return TFCCompat.isValidTree(levelReader, pos);
-        }
+//        }
         if (levelReader instanceof Level level) {
             var recipe = TreeTap.getRecipe(level, level.getBlockState(pos));
             if (recipe != null && recipe.value().requiredBlocks > 1) {

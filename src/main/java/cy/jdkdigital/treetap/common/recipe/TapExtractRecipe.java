@@ -1,4 +1,4 @@
-package cy.jdkdigital.treetap.common.block.recipe;
+package cy.jdkdigital.treetap.common.recipe;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -24,15 +24,16 @@ public class TapExtractRecipe implements Recipe<RecipeInput>
     public final Ingredient input;
     public final ItemStack itemOutput;
     public final ItemStack woodenItemOutput;
-    public final Ingredient harvestItem;
+    public final ItemStack harvestItem;
     public final boolean collectBucket;
     public final int processingTime;
     public final String fluidColor;
+    public final String particleColor;
     public final FluidStack displayFluid;
     public final List<Integer> lifeCycles;
     public final int requiredBlocks;
 
-    public TapExtractRecipe(Ingredient input, ItemStack itemOutput, ItemStack woodenItemOutput, Ingredient harvestItem, boolean collectBucket, int processingTime, FluidStack displayFluid, String fluidColor, int requiredBlocks, List<Integer> lifeCycles) {
+    public TapExtractRecipe(Ingredient input, ItemStack itemOutput, ItemStack woodenItemOutput, ItemStack harvestItem, boolean collectBucket, int processingTime, FluidStack displayFluid, String fluidColor, String particleColor, int requiredBlocks, List<Integer> lifeCycles) {
         this.input = input;
         this.itemOutput = itemOutput;
         this.woodenItemOutput = woodenItemOutput;
@@ -40,6 +41,7 @@ public class TapExtractRecipe implements Recipe<RecipeInput>
         this.collectBucket = collectBucket;
         this.processingTime = processingTime;
         this.fluidColor = fluidColor;
+        this.particleColor = particleColor;
         this.displayFluid = displayFluid;
         this.requiredBlocks = requiredBlocks;
         this.lifeCycles = lifeCycles;
@@ -86,12 +88,13 @@ public class TapExtractRecipe implements Recipe<RecipeInput>
                 builder -> builder.group(
                                 Ingredient.CODEC.fieldOf("log").forGetter(recipe -> recipe.input),
                                 ItemStack.CODEC.fieldOf("result").forGetter(recipe -> recipe.itemOutput),
-                                ItemStack.CODEC.fieldOf("wooden_result").orElse(ItemStack.EMPTY).forGetter(recipe -> recipe.woodenItemOutput),
-                                Ingredient.CODEC.fieldOf("harvest_item").orElse(Ingredient.EMPTY).forGetter(recipe -> recipe.harvestItem),
+                                ItemStack.OPTIONAL_CODEC.fieldOf("wooden_result").orElse(ItemStack.EMPTY).forGetter(recipe -> recipe.woodenItemOutput),
+                                ItemStack.OPTIONAL_CODEC.fieldOf("harvest_item").orElse(ItemStack.EMPTY).forGetter(recipe -> recipe.harvestItem),
                                 Codec.BOOL.fieldOf("collect_bucket").orElse(false).forGetter(recipe -> recipe.collectBucket),
                                 Codec.INT.fieldOf("processing_time").orElse(1000).forGetter(recipe -> recipe.processingTime),
                                 FluidStack.CODEC.fieldOf("display_fluid").orElse(new FluidStack(Fluids.WATER, 1000)).forGetter(recipe -> recipe.displayFluid),
                                 Codec.STRING.fieldOf("fluid_color").orElse("").forGetter(recipe -> recipe.fluidColor),
+                                Codec.STRING.fieldOf("particle_color").orElse("").forGetter(recipe -> recipe.particleColor),
                                 Codec.INT.fieldOf("required_block_count").orElse(1).forGetter(recipe -> recipe.requiredBlocks),
                                 Codec.INT.listOf().fieldOf("life_cycle").orElse(List.of(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)).forGetter(recipe -> recipe.lifeCycles)
                         )
@@ -117,12 +120,12 @@ public class TapExtractRecipe implements Recipe<RecipeInput>
                 return new TapExtractRecipe(
                         Ingredient.CONTENTS_STREAM_CODEC.decode(buffer),
                         ItemStack.STREAM_CODEC.decode(buffer),
-//                        ItemStack.STREAM_CODEC.decode(buffer),
-                        ItemStack.EMPTY,
-                        Ingredient.CONTENTS_STREAM_CODEC.decode(buffer),
+                        ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer),
+                        ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer),
                         buffer.readBoolean(),
                         buffer.readInt(),
                         FluidStack.STREAM_CODEC.decode(buffer),
+                        buffer.readUtf(),
                         buffer.readUtf(),
                         buffer.readInt(),
                         buffer.readList(FriendlyByteBuf::readInt)
@@ -137,12 +140,13 @@ public class TapExtractRecipe implements Recipe<RecipeInput>
             try {
                 Ingredient.CONTENTS_STREAM_CODEC.encode(buffer, recipe.input);
                 ItemStack.STREAM_CODEC.encode(buffer, recipe.itemOutput);
-//                ItemStack.STREAM_CODEC.encode(buffer, recipe.woodenItemOutput);
-                Ingredient.CONTENTS_STREAM_CODEC.encode(buffer, recipe.harvestItem);
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, recipe.woodenItemOutput);
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, recipe.harvestItem);
                 buffer.writeBoolean(recipe.collectBucket);
                 buffer.writeInt(recipe.processingTime);
                 FluidStack.STREAM_CODEC.encode(buffer, recipe.displayFluid);
                 buffer.writeUtf(recipe.fluidColor);
+                buffer.writeUtf(recipe.particleColor);
                 buffer.writeInt(recipe.requiredBlocks);
                 buffer.writeCollection(recipe.lifeCycles, FriendlyByteBuf::writeInt);
             } catch (Exception e) {

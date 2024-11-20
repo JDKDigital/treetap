@@ -123,7 +123,7 @@ public class SapCollectorBlock extends BaseEntityBlock
         var blockEntity = pLevel.getBlockEntity(pPos);
         if (blockEntity instanceof SapCollectorBlockEntity sapCollectorBlock) {
             if (sapCollectorBlock.currentRecipe != null && sapCollectorBlock.progress >= sapCollectorBlock.currentRecipe.value().processingTime) {
-                boolean hasCorrectItem = sapCollectorBlock.currentRecipe.value().harvestItem.isEmpty() && pStack.isEmpty() || sapCollectorBlock.currentRecipe.value().harvestItem.test(pStack);
+                boolean hasCorrectItem = sapCollectorBlock.currentRecipe.value().harvestItem.isEmpty() && pStack.isEmpty() || ItemStack.isSameItemSameComponents(sapCollectorBlock.currentRecipe.value().harvestItem, pStack);
                 if (hasCorrectItem) {
                     if (!pLevel.isClientSide) {
                         if (sapCollectorBlock.currentRecipe.value().collectBucket) {

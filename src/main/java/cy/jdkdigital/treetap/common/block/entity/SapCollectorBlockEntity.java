@@ -1,11 +1,10 @@
 package cy.jdkdigital.treetap.common.block.entity;
 
 import cy.jdkdigital.treetap.TreeTap;
-import cy.jdkdigital.treetap.common.block.recipe.TapExtractRecipe;
+import cy.jdkdigital.treetap.common.recipe.TapExtractRecipe;
 import cy.jdkdigital.treetap.util.ProgressFluidTank;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -21,7 +20,6 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class SapCollectorBlockEntity extends BlockEntity
 {

@@ -9,10 +9,11 @@
     "id": "minecraft:water_bucket"
   },
   "collect_bucket": true,
-  "fluid_color": "#ce9e11",
-  "conditions": [
+  "fluid_color": "#0000FF",
+  "particle_color": "#FF0000",
+  "neoforge:conditions": [
     {
-      "type": "forge:mod_loaded",
+      "type": "neoforge:mod_loaded",
       "modid": "thismoddoesnotexist"
     }
   ]

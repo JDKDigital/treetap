@@ -91,6 +91,9 @@ dependencies {
 
     implementation "curse.maven:jei-238222:5466551"
     implementation "curse.maven:jade-324717:5444008"
+
+//    implementation "curse.maven:terrafirmacraft-302973:4895012"
+//    implementation "curse.maven:dynamictrees-252818:5558006"
 }
 
 tasks.withType(ProcessResources).configureEach {

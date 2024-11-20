@@ -8,9 +8,9 @@
     "id": "pamhc2trees:maplesyrupitem"
   },
   "fluid_color": "#bb9351",
-  "conditions": [
+  "neoforge:conditions": [
     {
-      "type": "forge:mod_loaded",
+      "type": "neoforge:mod_loaded",
       "modid": "pamhc2trees"
     }
   ]
