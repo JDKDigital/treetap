@@ -130,18 +130,18 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
     runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
 
-    implementation fg.deobf("curse.maven:jei-238222:4609866")
-    implementation fg.deobf("curse.maven:patchouli-306770:4636277")
-//    implementation fg.deobf("curse.maven:the-one-probe-245211:4579432")
-    implementation fg.deobf("curse.maven:jade-324717:4654448")
+    implementation fg.deobf("curse.maven:jei-238222:5846810")
+    implementation fg.deobf("curse.maven:patchouli-306770:4966125")
+    implementation fg.deobf("curse.maven:jade-324717:5876199")
 
-    implementation fg.deobf("curse.maven:pams-harvestcraft-2-food-core-372534:4580935")
-    implementation fg.deobf("curse.maven:pams-harvestcraft-2-trees-365460:4625518")
+    implementation fg.deobf("curse.maven:ender-io-64578:5858176")
+    implementation fg.deobf("curse.maven:terrafirmacraft-302973:5872631")
 
-    implementation fg.deobf("curse.maven:ender-io-64578:4800730")
-    implementation fg.deobf("curse.maven:terrafirmacraft-302973:4895012")
+    implementation fg.deobf("curse.maven:dynamictrees-252818:5857981")
 
-    implementation fg.deobf("curse.maven:dynamictrees-252818:5558006")
+    implementation fg.deobf("curse.maven:cyclops-core-232758:5583765")
+    implementation fg.deobf("curse.maven:common-capabilities-247007:5650234")
+    implementation fg.deobf("curse.maven:integrated-dynamics-236307:5919553")
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
