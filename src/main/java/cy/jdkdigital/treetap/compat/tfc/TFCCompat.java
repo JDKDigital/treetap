@@ -74,6 +74,10 @@ public class TFCCompat
         return !Helpers.isBlock(branchState.getBlock(), TFCTags.Blocks.LOGS_THAT_LOG) || (branchState.hasProperty(TFCBlockStateProperties.BRANCH_DIRECTION) && branchState.getValue(TFCBlockStateProperties.BRANCH_DIRECTION).equals(BranchDirection.DOWN));
     }
 
+    public static boolean isCompatTree(LevelReader level, BlockPos pos) {
+        return level.getBlockState(pos).hasProperty(TFCBlockStateProperties.BRANCH_DIRECTION);
+    }
+
     public static float adjustTapModifier(Level level, BlockPos pos, float modifier) {
         // Check for other taps on same trunk
         AtomicInteger taps = new AtomicInteger(0);
