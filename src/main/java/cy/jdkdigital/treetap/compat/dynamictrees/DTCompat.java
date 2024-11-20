@@ -12,4 +12,8 @@
 //        }
 //        return false;
 //    }
+//
+//    public static boolean isCompatTree(LevelReader level, BlockPos pos) {
+//        return level.getBlockState(pos).getBlock() instanceof BranchBlock;
+//    }
 //}

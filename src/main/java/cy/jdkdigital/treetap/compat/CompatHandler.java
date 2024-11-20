@@ -37,10 +37,9 @@ public class CompatHandler
 
     public static boolean isValidTree(LevelReader levelReader, BlockPos pos) {
         //prioritize Dynamic Trees Valid tree registration over TFC
-//        if (ModList.get().isLoaded("dynamictrees")) {
+//        if (ModList.get().isLoaded("dynamictrees") && DTCompat.isCompatTree(levelReader, pos)) {
 //            return DTCompat.isValidTree(levelReader, pos);
-//        }
-//        else if (ModList.get().isLoaded("tfc")) {
+//        } else if (ModList.get().isLoaded("tfc") && TFCCompat.isCompatTree(levelReader, pos)) {
 //            return TFCCompat.isValidTree(levelReader, pos);
 //        }
         if (levelReader instanceof Level level) {

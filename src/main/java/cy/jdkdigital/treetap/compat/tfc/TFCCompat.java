@@ -17,14 +17,12 @@
 //import net.minecraft.core.Direction;
 //import net.minecraft.locale.Language;
 //import net.minecraft.network.chat.Component;
-//import net.minecraft.world.item.crafting.RecipeHolder;
 //import net.minecraft.world.level.Level;
 //import net.minecraft.world.level.LevelReader;
 //import net.minecraft.world.level.block.Block;
 //import net.minecraft.world.level.block.state.BlockState;
 //import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 //import net.minecraftforge.fml.ModList;
-//import net.neoforged.fml.ModList;
 //
 //import java.util.Arrays;
 //import java.util.List;
@@ -74,6 +72,10 @@
 //    public static boolean isValidTree(LevelReader level, BlockPos pos) {
 //        var branchState = level.getBlockState(pos);
 //        return !Helpers.isBlock(branchState.getBlock(), TFCTags.Blocks.LOGS_THAT_LOG) || (branchState.hasProperty(TFCBlockStateProperties.BRANCH_DIRECTION) && branchState.getValue(TFCBlockStateProperties.BRANCH_DIRECTION).equals(BranchDirection.DOWN));
+//    }
+//
+//    public static boolean isCompatTree(LevelReader level, BlockPos pos) {
+//        return level.getBlockState(pos).hasProperty(TFCBlockStateProperties.BRANCH_DIRECTION);
 //    }
 //
 //    public static float adjustTapModifier(Level level, BlockPos pos, float modifier) {
