@@ -39,12 +39,16 @@ public class TapBlockEntity extends BlockEntity
                 sapCollector.setCurrentRecipe(blockEntity.currentRecipe);
                 if (blockEntity.currentRecipe != null) {
                     level.setBlockAndUpdate(pos, state.setValue(BlockStateProperties.ATTACHED, true));
-                    if (!blockEntity.currentRecipe.fluidColor.isEmpty()) {
-                        TapBlock.color.put(pos, ColorUtil.getCacheColor(ColorUtil.getCacheColor(blockEntity.currentRecipe.fluidColor)));
+                    if (!blockEntity.currentRecipe.particleColor.isEmpty()) {
+                        TapBlock.color.put(pos, ColorUtil.getCacheColor(ColorUtil.getCacheColor(blockEntity.currentRecipe.particleColor)));
                     } else {
-                        IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(blockEntity.currentRecipe.displayFluid.getFluid());
-                        int fluidTintColour = renderProperties.getTintColor(blockEntity.currentRecipe.displayFluid);
-                        TapBlock.color.put(pos, ColorUtil.getCacheColor(fluidTintColour));
+                        if (!blockEntity.currentRecipe.fluidColor.isEmpty()) {
+                            TapBlock.color.put(pos, ColorUtil.getCacheColor(ColorUtil.getCacheColor(blockEntity.currentRecipe.fluidColor)));
+                        } else {
+                            IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(blockEntity.currentRecipe.displayFluid.getFluid());
+                            int fluidTintColour = renderProperties.getTintColor(blockEntity.currentRecipe.displayFluid);
+                            TapBlock.color.put(pos, ColorUtil.getCacheColor(fluidTintColour));
+                        }
                     }
                 } else {
                     level.setBlockAndUpdate(pos, state.setValue(BlockStateProperties.ATTACHED, false));
