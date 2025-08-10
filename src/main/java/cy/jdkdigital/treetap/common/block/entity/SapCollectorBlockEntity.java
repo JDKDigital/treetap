@@ -44,7 +44,7 @@ public class SapCollectorBlockEntity extends BlockEntity
         }
     };
 
-    private IFluidHandler fluidHandler = new ProgressFluidTank(1000, this);
+    public IFluidHandler fluidHandler = new ProgressFluidTank(1000, this);
 
     public SapCollectorBlockEntity(BlockPos pos, BlockState state) {
         super(TreeTap.SAP_COLLECTOR_BLOCK_ENTITY.get(), pos, state);
