@@ -4,7 +4,7 @@
     "item": "tfc:wood/log/pine"
   },
   "processing_time": 1200,
-  "metal_result": {
+  "result": {
     "id": "minecraft:water_bucket"
   },
   "wooden_result": {

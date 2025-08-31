@@ -3,6 +3,10 @@
     {
       "required": false,
       "id": "tfc:wooden_bucket"
+    },
+    {
+      "required": false,
+      "id": "woodenbucket:wooden_bucket"
     }
   ]
 }

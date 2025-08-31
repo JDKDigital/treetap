@@ -7,17 +7,23 @@
   "result": {
     "id": "minecraft:water_bucket"
   },
+  "wooden_result": {
+    "id": "woodenbucket:wooden_bucket",
+    "components": {
+      "bucketlib:fluid": {
+        "id": "minecraft:water",
+        "amount": 1000
+      }
+    }
+  },
   "collect_bucket": true,
   "display_fluid": {
     "fluid": "minecraft:water"
   },
   "neoforge:conditions": [
     {
-      "type": "neoforge:not",
-      "value": {
-        "type": "neoforge:mod_loaded",
-        "modid": "woodenbucket"
-      }
+      "type": "neoforge:mod_loaded",
+      "modid": "woodenbucket"
     }
   ]
 }

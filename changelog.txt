@@ -1,3 +1,8 @@
+1.21.0-0.4.5
+
+- Added support for Wooden Bucket mod
+
+
 1.21.0-0.4.4
 
 - Made fluid capability available
