@@ -133,8 +133,10 @@ public class TapBlock extends BaseEntityBlock
     @Override
     protected ItemInteractionResult useItemOn(ItemStack pStack, BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHitResult) {
         if (pLevel.getBlockState(pPos.below()).isAir()) {
-            BlockState collectorState = pPlayer.getItemInHand(pHand).is(TreeTap.METAL_BUCKETS) ? TreeTap.SAP_COLLECTOR.get().defaultBlockState() : (
-                    pPlayer.getItemInHand(pHand).is(TreeTap.WOODEN_BUCKETS) ? TreeTap.WOODEN_SAP_COLLECTOR.get().defaultBlockState() : null);
+            ItemStack heldStack = pPlayer.getItemInHand(pHand);
+            BlockState collectorState = heldStack.is(TreeTap.METAL_BUCKETS) ? TreeTap.SAP_COLLECTOR.get().defaultBlockState() : (
+                    heldStack.is(TreeTap.WOODEN_BUCKETS) ? TreeTap.WOODEN_SAP_COLLECTOR.get().defaultBlockState() : (
+                    heldStack.is(TreeTap.CERAMIC_BUCKETS) ? TreeTap.CERAMIC_SAP_COLLECTOR.get().defaultBlockState() : null));
             if (collectorState != null) {
                 if (!pLevel.isClientSide) {
                     pLevel.setBlockAndUpdate(pPos.below(), collectorState.setValue(HorizontalDirectionalBlock.FACING, pState.getValue(HorizontalDirectionalBlock.FACING)));

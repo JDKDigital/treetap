@@ -113,7 +113,8 @@ public class SapCollectorBlock extends BaseEntityBlock
 
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
-        var tag = state.is(TreeTap.WOODEN_SAP_COLLECTOR.get()) ? TreeTap.WOODEN_BUCKETS : TreeTap.METAL_BUCKETS;
+        var tag = state.is(TreeTap.WOODEN_SAP_COLLECTOR.get()) ? TreeTap.WOODEN_BUCKETS : (
+                state.is(TreeTap.CERAMIC_SAP_COLLECTOR.get()) ? TreeTap.CERAMIC_BUCKETS : TreeTap.METAL_BUCKETS);
         var bucketItem = BuiltInRegistries.ITEM.getTagOrEmpty(tag).iterator();
         return bucketItem.hasNext() ? new ItemStack(bucketItem.next()) : ItemStack.EMPTY;
     }

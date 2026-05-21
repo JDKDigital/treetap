@@ -21,6 +21,7 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TapExtractRecipeCategory implements IRecipeCategory<TapExtractRecipe>
@@ -62,8 +63,16 @@ public class TapExtractRecipeCategory implements IRecipeCategory<TapExtractRecip
         builder.addSlot(RecipeIngredientRole.INPUT, 18, 27)
                 .addIngredients(VanillaTypes.ITEM_STACK, List.of(recipe.input.getItems()))
                 .setSlotName("log");
+        List<ItemStack> outputs = new ArrayList<>();
+        outputs.add(recipe.itemOutput.copy());
+        if (!recipe.woodenItemOutput.isEmpty()) {
+            outputs.add(recipe.woodenItemOutput.copy());
+        }
+        if (!recipe.ceramicItemOutput.isEmpty()) {
+            outputs.add(recipe.ceramicItemOutput.copy());
+        }
         builder.addSlot(RecipeIngredientRole.OUTPUT, 90, 27)
-                .addIngredients(VanillaTypes.ITEM_STACK, recipe.woodenItemOutput.isEmpty() ? List.of(recipe.itemOutput.copy()) : List.of(recipe.itemOutput.copy(), recipe.woodenItemOutput.copy()))
+                .addIngredients(VanillaTypes.ITEM_STACK, outputs)
                 .setSlotName("output");
 
         var cap = recipe.itemOutput.getCapability(Capabilities.FluidHandler.ITEM);
