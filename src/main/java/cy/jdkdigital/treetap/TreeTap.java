@@ -52,7 +52,8 @@ public class TreeTap
 
     public static final DeferredHolder<Block, Block> SAP_COLLECTOR = BLOCKS.register("sap_collector", () -> new SapCollectorBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CAULDRON)));
     public static final DeferredHolder<Block, Block> WOODEN_SAP_COLLECTOR = BLOCKS.register("wooden_sap_collector", () -> new SapCollectorBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WOOD)));
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SapCollectorBlockEntity>> SAP_COLLECTOR_BLOCK_ENTITY = BLOCK_ENTITY.register("sap_collector", () -> BlockEntityType.Builder.of(SapCollectorBlockEntity::new, SAP_COLLECTOR.get(), WOODEN_SAP_COLLECTOR.get()).build(null));
+    public static final DeferredHolder<Block, Block> CERAMIC_SAP_COLLECTOR = BLOCKS.register("ceramic_sap_collector", () -> new SapCollectorBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TERRACOTTA)));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SapCollectorBlockEntity>> SAP_COLLECTOR_BLOCK_ENTITY = BLOCK_ENTITY.register("sap_collector", () -> BlockEntityType.Builder.of(SapCollectorBlockEntity::new, SAP_COLLECTOR.get(), WOODEN_SAP_COLLECTOR.get(), CERAMIC_SAP_COLLECTOR.get()).build(null));
     public static final DeferredHolder<Block, Block> TAP = BLOCKS.register("tap", () -> new TapBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_BLOCK).noOcclusion(), 1f));
     public static final DeferredHolder<Item, Item> TAP_ITEM = ITEMS.register("tap", () -> new TapItem(TAP.get(), new Item.Properties()));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TapBlockEntity>> TAP_BLOCK_ENTITY = BLOCK_ENTITY.register("tap", () -> BlockEntityType.Builder.of(TapBlockEntity::new, TAP.get()).build(null));
@@ -63,6 +64,7 @@ public class TreeTap
     public static final TagKey<Item> TAPS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(MODID, "taps"));
     public static final TagKey<Item> METAL_BUCKETS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(MODID, "metal_buckets"));
     public static final TagKey<Item> WOODEN_BUCKETS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(MODID, "wooden_buckets"));
+    public static final TagKey<Item> CERAMIC_BUCKETS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(MODID, "ceramic_buckets"));
 
     public TreeTap(IEventBus modEventBus, ModContainer modContainer)
     {

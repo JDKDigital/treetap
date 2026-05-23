@@ -1,3 +1,10 @@
+1.21.0-0.4.6
+
+- Added support for Ceramic Bucket mod
+- Added ceramic_sap_collector block with its own model/textures
+- Added treetap:ceramic_buckets item tag and ceramic_result recipe field
+
+
 1.21.0-0.4.5
 
 - Added support for Wooden Bucket mod

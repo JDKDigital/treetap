@@ -24,6 +24,7 @@ public class TapExtractRecipe implements Recipe<RecipeInput>
     public final Ingredient input;
     public final ItemStack itemOutput;
     public final ItemStack woodenItemOutput;
+    public final ItemStack ceramicItemOutput;
     public final ItemStack harvestItem;
     public final boolean collectBucket;
     public final int processingTime;
@@ -33,10 +34,11 @@ public class TapExtractRecipe implements Recipe<RecipeInput>
     public final List<Integer> lifeCycles;
     public final int requiredBlocks;
 
-    public TapExtractRecipe(Ingredient input, ItemStack itemOutput, ItemStack woodenItemOutput, ItemStack harvestItem, boolean collectBucket, int processingTime, FluidStack displayFluid, String fluidColor, String particleColor, int requiredBlocks, List<Integer> lifeCycles) {
+    public TapExtractRecipe(Ingredient input, ItemStack itemOutput, ItemStack woodenItemOutput, ItemStack ceramicItemOutput, ItemStack harvestItem, boolean collectBucket, int processingTime, FluidStack displayFluid, String fluidColor, String particleColor, int requiredBlocks, List<Integer> lifeCycles) {
         this.input = input;
         this.itemOutput = itemOutput;
         this.woodenItemOutput = woodenItemOutput;
+        this.ceramicItemOutput = ceramicItemOutput;
         this.harvestItem = harvestItem;
         this.collectBucket = collectBucket;
         this.processingTime = processingTime;
@@ -68,8 +70,13 @@ public class TapExtractRecipe implements Recipe<RecipeInput>
     }
 
     public ItemStack getResultItem(BlockState blockState) {
-        boolean woodResult = blockState.is(TreeTap.WOODEN_SAP_COLLECTOR.get());
-        return woodResult ? woodenItemOutput.copy() : itemOutput.copy();
+        if (blockState.is(TreeTap.WOODEN_SAP_COLLECTOR.get())) {
+            return woodenItemOutput.copy();
+        }
+        if (blockState.is(TreeTap.CERAMIC_SAP_COLLECTOR.get()) && !ceramicItemOutput.isEmpty()) {
+            return ceramicItemOutput.copy();
+        }
+        return itemOutput.copy();
     }
 
     @Override
@@ -89,6 +96,7 @@ public class TapExtractRecipe implements Recipe<RecipeInput>
                                 Ingredient.CODEC.fieldOf("log").forGetter(recipe -> recipe.input),
                                 ItemStack.CODEC.fieldOf("result").forGetter(recipe -> recipe.itemOutput),
                                 ItemStack.OPTIONAL_CODEC.fieldOf("wooden_result").orElse(ItemStack.EMPTY).forGetter(recipe -> recipe.woodenItemOutput),
+                                ItemStack.OPTIONAL_CODEC.fieldOf("ceramic_result").orElse(ItemStack.EMPTY).forGetter(recipe -> recipe.ceramicItemOutput),
                                 ItemStack.OPTIONAL_CODEC.fieldOf("harvest_item").orElse(ItemStack.EMPTY).forGetter(recipe -> recipe.harvestItem),
                                 Codec.BOOL.fieldOf("collect_bucket").orElse(false).forGetter(recipe -> recipe.collectBucket),
                                 Codec.INT.fieldOf("processing_time").orElse(1000).forGetter(recipe -> recipe.processingTime),
@@ -122,6 +130,7 @@ public class TapExtractRecipe implements Recipe<RecipeInput>
                         ItemStack.STREAM_CODEC.decode(buffer),
                         ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer),
                         ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer),
+                        ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer),
                         buffer.readBoolean(),
                         buffer.readInt(),
                         FluidStack.STREAM_CODEC.decode(buffer),
@@ -141,6 +150,7 @@ public class TapExtractRecipe implements Recipe<RecipeInput>
                 Ingredient.CONTENTS_STREAM_CODEC.encode(buffer, recipe.input);
                 ItemStack.STREAM_CODEC.encode(buffer, recipe.itemOutput);
                 ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, recipe.woodenItemOutput);
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, recipe.ceramicItemOutput);
                 ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, recipe.harvestItem);
                 buffer.writeBoolean(recipe.collectBucket);
                 buffer.writeInt(recipe.processingTime);
